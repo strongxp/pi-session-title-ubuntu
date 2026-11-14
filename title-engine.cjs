@@ -1,0 +1,97 @@
+"use strict";
+
+const TITLE_PROMPT_TEMPLATE = `使用简体中文，为下面的会话生成一个准确、便于日后检索的标题。
+
+要求：
+1. 优先表达“具体对象＋核心动作或目标”。
+2. 保留关键产品名、模块名和问题特征。
+3. 以用户实际需求为准，不把助手建议当作已确定目标，不把计划写成已完成结果。
+4. 避免“问题咨询”“优化方案”“帮忙处理”等泛泛措辞。
+5. 尽量控制在 12～24 个汉字，必要时保留英文技术名。
+6. 只输出标题，不加引号、解释或前缀。
+
+用户需求：
+{{userPrompt}}
+
+助手回复（如有）：
+{{assistantReply}}`;
+const MAX_PROMPT_TEMPLATE_LENGTH = 20_000;
+
+const THINKING_LEVELS = new Set([
+  "off",
+  "minimal",
+  "low",
+  "medium",
+  "high",
+  "xhigh",
+  "max",
+]);
+
+function normalizeSettings(value) {
+  const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const promptTemplate = typeof source.promptTemplate === "string" ? source.promptTemplate : "";
+  return {
+    enabled: source.enabled !== false,
+    modelKey: typeof source.modelKey === "string" ? source.modelKey.trim().slice(0, 256) : "",
+    thinkingLevel: THINKING_LEVELS.has(source.thinkingLevel) ? source.thinkingLevel : "off",
+    promptTemplate: isValidPromptTemplate(promptTemplate) ? promptTemplate : TITLE_PROMPT_TEMPLATE,
+  };
+}
+
+function isValidPromptTemplate(value) {
+  return (
+    typeof value === "string" &&
+    value.trim().length > 0 &&
+    Array.from(value).length <= MAX_PROMPT_TEMPLATE_LENGTH &&
+    value.includes("{{userPrompt}}")
+  );
+}
+
+function selectModel(models, preferredKey, sessionKey) {
+  const available = Array.isArray(models)
+    ? models.filter((model) => model && typeof model.key === "string" && model.key.includes("/"))
+    : [];
+  return (
+    available.find((model) => model.key === preferredKey) ??
+    available.find((model) => model.key === sessionKey) ??
+    available.find((model) => model.isDefault === true) ??
+    available[0] ??
+    null
+  );
+}
+
+function resolveThinkingLevel(requested, model) {
+  const available = Array.isArray(model?.thinkingLevels) ? model.thinkingLevels : [];
+  if (requested === "off" || available.includes(requested)) return requested;
+  return "off";
+}
+
+function renderPrompt(template, context) {
+  return String(template ?? TITLE_PROMPT_TEMPLATE).replace(
+    /\{\{(userPrompt|assistantReply)\}\}/g,
+    (_match, key) => (key === "userPrompt" ? context.userPrompt : context.assistantReply ?? ""),
+  );
+}
+
+function normalizeGeneratedTitle(value) {
+  if (typeof value !== "string") return "";
+  let title = value
+    .trim()
+    .replace(/^(?:session\s+)?title\s*[:：]\s*/i, "")
+    .replace(/^["'“”‘’`「」『』]+|["'“”‘’`「」『』]+$/g, "")
+    .replace(/\s+/g, " ")
+    .replace(/[.!?。！？:：]+$/u, "")
+    .trim();
+  return Array.from(title).slice(0, 80).join("");
+}
+
+module.exports = {
+  TITLE_PROMPT_TEMPLATE,
+  normalizeGeneratedTitle,
+  normalizeSettings,
+  isValidPromptTemplate,
+  MAX_PROMPT_TEMPLATE_LENGTH,
+  renderPrompt,
+  resolveThinkingLevel,
+  selectModel,
+};

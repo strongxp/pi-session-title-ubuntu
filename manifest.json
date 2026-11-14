@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "net.stronghe.session-title-ubuntu",
+  "name": "Ubuntu Session Titles",
+  "version": "0.1.0",
+  "description": "Generate concise Simplified Chinese session titles in PI-Desktop on Ubuntu, with a configurable prompt, model, and thinking level.",
+  "author": "StrongHE; upstream by Lan",
+  "homepage": "https://github.com/strongxp/pi-session-title-ubuntu",
+  "repository": "https://github.com/strongxp/pi-session-title-ubuntu",
+  "license": "LGPL-3.0-or-later",
+  "categories": ["productivity"],
+  "i18n": {
+    "en": {
+      "name": "Ubuntu Session Titles",
+      "description": "Generate concise Simplified Chinese session titles in PI-Desktop on Ubuntu, with a configurable prompt, model, and thinking level.",
+      "safetyNotes": "After an eligible completed turn, bounded excerpts of the first user prompt and assistant reply are sent to the selected model through PI-Desktop's completion API. Each title generation may consume a model completion. Requires agent.complete and session.autoTitle; manual renames are preserved. Disable the original Session Titles plugin before enabling this fork to avoid duplicate requests."
+    },
+    "zh-CN": {
+      "name": "Ubuntu 会话标题",
+      "description": "面向 Ubuntu 上的 PI-Desktop，默认生成便于检索的简体中文会话标题，支持自定义提示词、模型和思考级别。",
+      "safetyNotes": "符合条件的回合完成后，通过 PI-Desktop 补全 API 将首条需求和首条回复的有限摘录发送给所选模型，每次生成可能消耗一次模型调用。需要 agent.complete 和 session.autoTitle 权限，保留手动改名。启用前请停用原版「会话标题」，避免重复请求。"
+    }
+  },
+  "main": "main.js",
+  "ui": {
+    "panel": "panel/index.html",
+    "width": 560,
+    "height": 620,
+    "title": {
+      "en": "Ubuntu Session Titles",
+      "zh-CN": "Ubuntu 会话标题"
+    }
+  },
+  "contributes": {
+    "commands": [
+      {
+        "id": "ubuntu-session-title.configure",
+        "title": "Ubuntu Session Titles: Configure",
+        "keywords": ["ubuntu", "title", "prompt", "model"],
+        "category": "Ubuntu Session Titles"
+      }
+    ]
+  },
+  "permissions": [
+    "ui.panel",
+    "agent.complete",
+    "models.list",
+    "session.autoTitle"
+  ],
+  "engines": {
+    "piDesktop": ">=0.18.0"
+  },
+  "activationEvents": ["onStartup"]
+}

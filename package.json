@@ -1,0 +1,13 @@
+{
+  "name": "stronghe-pi-session-title-ubuntu",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ubuntu-focused PI-Desktop session titles with a Simplified Chinese default prompt. Fork of vastsa/pi-session-title-plugin by Lan.",
+  "license": "LGPL-3.0-or-later",
+  "homepage": "https://github.com/strongxp/pi-session-title-ubuntu",
+  "repository": "https://github.com/strongxp/pi-session-title-ubuntu",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test test/*.test.cjs"
+  }
+}
